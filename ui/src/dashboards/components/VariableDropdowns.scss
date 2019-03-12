@@ -1,0 +1,38 @@
+@import 'src/style/modules';
+
+.variable-dropdown-toolbar {
+  display: 'flex';
+  width: 100%;
+  align-content: flex-start;
+}
+
+.variable-dropdown-container {
+  display: flex;
+  flex-direction: row;
+}
+
+.variable-label {
+  border: 0;
+  font-family: $ix-text-font;
+  font-weight: 600;
+  background-color: transparent;
+  color: $g11-sidewalk;
+  text-transform: capitalize;
+  border-radius: $radius - 1px;
+  outline: none;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  padding: 4px;
+  border-radius: $radius;
+  border-top-right-radius: 0px;
+  border-bottom-right-radius: 0px;
+  background-color: $g5-pepper;
+}
+
+.variable-dropdown {
+  .button {
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 0px;
+  }
+}
