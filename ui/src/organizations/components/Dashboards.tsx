@@ -21,9 +21,9 @@ import {
   updateDashboardAsync,
   addDashboardLabelsAsync,
   removeDashboardLabelsAsync,
-} from 'src/dashboards/actions/v2'
+} from 'src/dashboards/actions'
 import {setDefaultDashboard} from 'src/shared/actions/links'
-import {retainRangesDashTimeV1 as retainRangesDashTimeV1Action} from 'src/dashboards/actions/v2/ranges'
+import {retainRangesDashTimeV1 as retainRangesDashTimeV1Action} from 'src/dashboards/actions/ranges'
 import {notify as notifyAction} from 'src/shared/actions/notifications'
 
 import {
