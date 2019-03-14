@@ -1,21 +1,13 @@
-// Libraries
-import {get} from 'lodash'
-
 // Actions
 import {loadBuckets} from 'src/timeMachine/actions/queryBuilder'
-import {refreshVariableValues} from 'src/variables/actions'
-
-// Utils
-import {getActiveTimeMachine} from 'src/timeMachine/selectors'
-import {filterUnusedVars} from 'src/shared/utils/filterUnusedVars'
-import {getVariablesForOrg} from 'src/variables/selectors'
-import {getActiveOrg} from 'src/organizations/selectors'
+import {executeQueries} from 'src/timeMachine/actions/queries'
 
 // Types
 import {Dispatch} from 'redux-thunk'
 import {TimeMachineState} from 'src/timeMachine/reducers'
 import {Action as QueryBuilderAction} from 'src/timeMachine/actions/queryBuilder'
-import {TimeRange, ViewType, GetState} from 'src/types/v2'
+import {Action as QueryResultsAction} from 'src/timeMachine/actions/queries'
+import {TimeRange, ViewType} from 'src/types/v2'
 import {
   Axes,
   DecimalPlaces,
@@ -29,13 +21,13 @@ import {Table, HistogramPosition, isNumeric} from 'src/minard'
 
 export type Action =
   | QueryBuilderAction
+  | QueryResultsAction
   | SetActiveTimeMachineAction
   | SetActiveTabAction
   | SetNameAction
   | SetTimeRangeAction
   | SetTypeAction
   | SetActiveQueryText
-  | SubmitQueriesAction
   | SetIsViewingRawDataAction
   | SetGeomAction
   | SetDecimalPlaces
@@ -138,14 +130,6 @@ interface SetActiveQueryText {
 export const setActiveQueryText = (text: string): SetActiveQueryText => ({
   type: 'SET_ACTIVE_QUERY_TEXT',
   payload: {text},
-})
-
-interface SubmitQueriesAction {
-  type: 'SUBMIT_QUERIES'
-}
-
-export const submitQueries = (): SubmitQueriesAction => ({
-  type: 'SUBMIT_QUERIES',
 })
 
 interface SetIsViewingRawDataAction {
@@ -405,7 +389,7 @@ export const toggleQuery = (queryIndex: number) => (
   dispatch: Dispatch<Action>
 ) => {
   dispatch(toggleQuerySync(queryIndex))
-  dispatch(submitQueriesWithVars())
+  dispatch(executeQueries())
 }
 
 interface UpdateActiveQueryNameAction {
@@ -551,39 +535,3 @@ export const setXAxisLabel = (xAxisLabel: string): SetXAxisLabelAction => ({
   type: 'SET_X_AXIS_LABEL',
   payload: {xAxisLabel},
 })
-
-export const refreshTimeMachineVariableValues = () => async (
-  dispatch,
-  getState: GetState
-) => {
-  const contextID = getState().timeMachines.activeTimeMachineID
-
-  // Find variables currently used by queries in the TimeMachine
-  const {view, draftQueries} = getActiveTimeMachine(getState())
-  const draftView = {
-    ...view,
-    properties: {...view.properties, queries: draftQueries},
-  }
-  const orgID = getActiveOrg(getState()).id
-  const variables = getVariablesForOrg(getState(), orgID)
-  const variablesInUse = filterUnusedVars(variables, [draftView])
-
-  // Find variables whose values have already been loaded by the TimeMachine
-  // (regardless of whether these variables are currently being used)
-  const existingVariableIDs = Object.keys(
-    get(getState(), `variables.values.${contextID}.values`, {})
-  )
-
-  // Refresh values for all variables with existing values and in use variables
-  const variablesToRefresh = variables.filter(
-    v => variablesInUse.includes(v) || existingVariableIDs.includes(v.id)
-  )
-
-  await dispatch(refreshVariableValues(contextID, orgID, variablesToRefresh))
-}
-
-export const submitQueriesWithVars = () => async dispatch => {
-  await dispatch(refreshTimeMachineVariableValues())
-
-  dispatch(submitQueries())
-}

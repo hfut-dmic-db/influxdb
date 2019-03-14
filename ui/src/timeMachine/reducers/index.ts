@@ -1,5 +1,5 @@
 // Libraries
-import {get, cloneDeep} from 'lodash'
+import {get, cloneDeep, isNumber} from 'lodash'
 import {produce} from 'immer'
 import _ from 'lodash'
 
@@ -42,6 +42,14 @@ interface QueryBuilderState {
   }>
 }
 
+interface QueryResultsState {
+  files: string[] | null
+  status: RemoteDataState
+  isInitialFetch: boolean
+  fetchDuration: number
+  errorMessage: string
+}
+
 export interface TimeMachineState {
   view: QueryView
   timeRange: TimeRange
@@ -53,6 +61,7 @@ export interface TimeMachineState {
   availableXColumns: string[]
   availableGroupColumns: string[]
   queryBuilder: QueryBuilderState
+  queryResults: QueryResultsState
 }
 
 export interface TimeMachinesState {
@@ -72,6 +81,13 @@ export const initialStateHelper = (): TimeMachineState => ({
   submitToken: 0,
   availableXColumns: [],
   availableGroupColumns: [],
+  queryResults: {
+    files: null,
+    status: RemoteDataState.NotStarted,
+    isInitialFetch: true,
+    fetchDuration: null,
+    errorMessage: null,
+  },
   queryBuilder: {
     buckets: [],
     bucketsStatus: RemoteDataState.NotStarted,
@@ -190,9 +206,20 @@ export const timeMachineReducer = (
       return {...state, draftQueries}
     }
 
-    case 'SUBMIT_QUERIES': {
+    case 'SET_QUERY_RESULTS': {
       return produce(state, draftState => {
-        submitQueries(draftState)
+        const {status, files, fetchDuration, errorMessage} = action.payload
+
+        draftState.queryResults.status = status
+        draftState.queryResults.errorMessage = errorMessage
+
+        if (files) {
+          draftState.queryResults.files = files
+        }
+
+        if (isNumber(fetchDuration)) {
+          draftState.queryResults.fetchDuration = fetchDuration
+        }
       })
     }
 
