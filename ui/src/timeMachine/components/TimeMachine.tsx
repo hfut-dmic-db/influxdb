@@ -40,7 +40,7 @@ interface StateProps {
 }
 
 interface DispatchProps {
-  onRefreshVariableValues: () => Promise<void>
+  onRefreshVariableValues: typeof refreshTimeMachineVariableValues
 }
 
 interface State {
@@ -60,7 +60,7 @@ class TimeMachine extends Component<Props, State> {
     try {
       await this.props.onRefreshVariableValues()
     } catch (e) {
-      console.log(e)
+      console.error(e)
     }
 
     // Even if refreshing the variable values fails, most of the `TimeMachine`
@@ -146,7 +146,7 @@ const mstp = (state: AppState) => {
 }
 
 const mdtp = {
-  onRefreshVariableValues: refreshTimeMachineVariableValues as any,
+  onRefreshVariableValues: refreshTimeMachineVariableValues,
 }
 
 export default connect<StateProps, DispatchProps, {}>(

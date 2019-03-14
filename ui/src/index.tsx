@@ -45,6 +45,7 @@ import OrgScrapersIndex from 'src/organizations/containers/OrgScrapersIndex'
 import OrgTasksIndex from 'src/organizations/containers/OrgTasksIndex'
 import TaskExportOverlay from 'src/organizations/components/TaskExportOverlay'
 import TaskImportOverlay from 'src/organizations/components/TaskImportOverlay'
+import VEO from 'src/dashboards/components/VEO'
 
 import OnboardingWizardPage from 'src/onboarding/containers/OnboardingWizardPage'
 
@@ -167,10 +168,12 @@ class Root extends PureComponent {
                         />
                         <Route path="dashboards">
                           <IndexRoute component={DashboardsIndex} />
-                          <Route
-                            path=":dashboardID"
-                            component={DashboardPage}
-                          />
+                          <Route path=":dashboardID" component={DashboardPage}>
+                            <Route path="cells">
+                              <Route path="new" component={VEO} />
+                              <Route path=":cellID/edit" component={VEO} />
+                            </Route>
+                          </Route>
                           <Route
                             path=":dashboardID/export"
                             component={DashboardExportOverlay}
